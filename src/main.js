@@ -2,9 +2,11 @@ import { createApp } from "vue";
 import App from "./App.vue";
 import PrimeVue from "primevue/config";
 import router from "./router";
+
 //theme and icons
 import "primevue/resources/themes/soho-light/theme.css";
 // import "primevue/resources/themes/mdc-light-indigo/theme.css";
+// import "primevue/resources/themes/md-dark-indigo/theme.css";
 import "primevue/resources/primevue.min.css"; //core css
 import "primeicons/primeicons.css"; //icons
 import "primeflex/primeflex.css";
@@ -16,7 +18,7 @@ import MultiSelect from "primevue/multiselect";
 import ToggleButton from "primevue/togglebutton";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
-import ColumnGroup from "primevue/columngroup"; // optional
+import ColumnGroup from "primevue/columngroup";
 import Row from "primevue/row";
 import Paginator from "primevue/paginator";
 import Tooltip from "primevue/tooltip";
@@ -57,5 +59,6 @@ app.component("ToggleButton", ToggleButton);
 app.component("TabView", TabView);
 app.component("TabPanel", TabPanel);
 app.component("Toolbar", Toolbar);
+
 //directives
 app.directive("tooltip", Tooltip);
