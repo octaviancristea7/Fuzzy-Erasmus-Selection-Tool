@@ -11,69 +11,214 @@
             @click="openNew"
           />
           <Button
-            label="Calculare fuzzy"
+            label="CALCULARE FUZZY"
             icon="pi pi-calculator"
             severity="info"
             class="mr-2"
-            @click="getResult"
+            @click="
+              getResult();
+              isResultVisibile = true;
+            "
           />
         </template>
+        <template #end>
+          <Button
+            label="DOCUMENTAȚIE"
+            icon="pi pi-book"
+            severity="help"
+            class="mr-2"
+            @click="getDocumentation"
+        /></template>
       </Toolbar>
-      <DataTable
-        :value="students"
-        tableStyle="min-width: 50rem"
-        paginator
-        :rows="5"
-        :rowsPerPageOptions="[5, 10, 20, 50]"
+      <div
+        id="tableAndCardWrapper"
+        class="flex align-items-start justify-content-between mr-8"
       >
-        <Column
-          field="name"
-          header="name student"
-          bodyClass="text-center"
-          sortable
-        ></Column>
-        <Column
-          field="firstSemester"
-          header="Medie semestrul I"
-          bodyClass="text-center"
-          sortable
-        ></Column>
-        <Column
-          field="secondSemester"
-          header="Medie semestrul II"
-          bodyClass="text-center"
-          sortable
-        ></Column>
-        <Column
-          field="foreignLanguage"
-          header="Notă limbă străină"
-          bodyClass="text-center"
-          sortable
-        ></Column>
-        <Column
-          :exportable="false"
-          style="min-width: 8rem"
-          header="Acțiuni"
-          bodyClass="text-center"
+        <div
+          style="width: 70%"
+          id="tableWrapper"
+          class="flex flex-column justify-content-between align-items-center"
         >
-          <template #body="slotProps">
-            <Button
-              icon="pi pi-pencil"
-              outlined
-              rounded
-              class="mr-2"
-              @click="editStudent"
-            />
-            <Button
-              icon="pi pi-trash"
-              outlined
-              rounded
-              severity="danger"
-              @click="confirmDeleteStudent(slotProps.data)"
-            />
-          </template>
-        </Column>
-      </DataTable>
+          <DataTable
+            style="width: 100%"
+            :value="students"
+            tableStyle="min-width: 50rem"
+            paginator
+            :rows="5"
+            :rowsPerPageOptions="[5, 10, 20, 50]"
+          >
+            <Column
+              field="name"
+              header="Nume student"
+              bodyClass="text-center"
+              sortable
+            ></Column>
+            <Column
+              field="firstSemester"
+              header="Medie semestrul I"
+              bodyClass="text-center"
+              sortable
+            ></Column>
+            <Column
+              field="secondSemester"
+              header="Medie semestrul II"
+              bodyClass="text-center"
+              sortable
+            ></Column>
+            <Column
+              field="foreignLanguage"
+              header="Notă limbă străină"
+              bodyClass="text-center"
+              sortable
+            ></Column>
+            <Column
+              :exportable="false"
+              style="min-width: 8rem"
+              header="Acțiuni"
+              bodyClass="text-center"
+            >
+              <template #body="slotProps">
+                <Button
+                  icon="pi pi-pencil"
+                  outlined
+                  rounded
+                  class="mr-2"
+                  @click="editStudent"
+                />
+                <Button
+                  icon="pi pi-trash"
+                  outlined
+                  rounded
+                  severity="danger"
+                  @click="confirmDeleteStudent(slotProps.data)"
+                />
+              </template>
+            </Column>
+          </DataTable>
+          <Card style="width: 100%" v-if="isResultVisibile">
+            <template #title> Rezultat </template>
+            <template #content>
+              <h3>
+                Rezultatul selecției studenților pentru programul Erasmus este:
+                <span v-for="student in erasmusStudents"> {{ student }}, </span>
+              </h3>
+            </template>
+          </Card>
+        </div>
+        <div id="cardWrappers" class="flex flex-column">
+          <Card class="m-1 p-0" style="width: 25em; height: 25%">
+            <template #title> Semestrul I </template>
+            <template #subtitle> Funcție apartenență </template>
+            <template #content>
+              <p>
+                0, 0≤X≤<InputText
+                  class="p-1 m-1"
+                  style="width: 3rem"
+                  v-model="functionParams.stFunctionLow"
+                />
+              </p>
+              <p>
+                X-{{ functionParams.stFunctionLow }},
+                <InputText
+                  class="p-1 m-1"
+                  style="width: 3rem"
+                  v-model="functionParams.stFunctionLow"
+                />≤X≤<InputText
+                  class="p-1 m-1"
+                  style="width: 3rem"
+                  v-model="functionParams.stFunctionMedium"
+                />
+              </p>
+              <p>
+                1,
+                <InputText
+                  class="p-1 m-1"
+                  style="width: 3rem"
+                  v-model="functionParams.stFunctionMedium"
+                />≤X≤<InputText
+                  class="p-1 m-1"
+                  style="width: 3rem"
+                  v-model="functionParams.stFunctionHigh"
+                />
+              </p>
+            </template>
+          </Card>
+          <Card class="m-1 p-0" style="width: 25em">
+            <template #title> Semestrul II </template>
+            <template #subtitle> Funcție apartenență </template>
+            <template #content>
+              <p>
+                0, 0≤X≤<InputText
+                  class="p-1 m-1"
+                  style="width: 3rem"
+                  v-model="functionParams.secondFunctionLow"
+                />
+              </p>
+              <p>
+                (X-{{ functionParams.secondFunctionLow }})/2,
+                <InputText
+                  class="p-1 m-1"
+                  style="width: 3rem"
+                  v-model="functionParams.secondFunctionLow"
+                />≤X≤<InputText
+                  class="p-1 m-1"
+                  style="width: 3rem"
+                  v-model="functionParams.secondFunctionMedium"
+                />
+              </p>
+              <p>
+                1,
+                <InputText
+                  class="p-1 m-1"
+                  style="width: 3rem"
+                  v-model="functionParams.secondFunctionMedium"
+                />≤X≤<InputText
+                  class="p-1 m-1"
+                  style="width: 3rem"
+                  v-model="functionParams.secondFunctionHigh"
+                />
+              </p>
+            </template>
+          </Card>
+          <Card class="m-1 p-0" style="width: 25em">
+            <template #title> Limbă străină </template>
+            <template #subtitle> Funcție apartenență </template>
+            <template #content>
+              <p>
+                0, 0≤X≤<InputText
+                  class="p-1 m-1"
+                  style="width: 3rem"
+                  v-model="functionParams.flFunctionLow"
+                />
+              </p>
+              <p>
+                (X-{{ functionParams.flFunctionLow }})/1.5,
+                <InputText
+                  class="p-1 m-1"
+                  style="width: 3rem"
+                  v-model="functionParams.flFunctionLow"
+                />≤X≤<InputText
+                  class="p-1 m-1"
+                  style="width: 3rem"
+                  v-model="functionParams.flFunctionMedium"
+                />
+              </p>
+              <p>
+                1,
+                <InputText
+                  class="p-1 m-1"
+                  style="width: 3rem"
+                  v-model="functionParams.flFunctionMedium"
+                />≤X≤<InputText
+                  class="p-1 m-1"
+                  style="width: 3rem"
+                  v-model="functionParams.flFunctionHigh"
+                />
+              </p>
+            </template>
+          </Card>
+        </div>
+      </div>
       <Dialog
         v-model:visible="isDeleteStudentDialog"
         :style="{ width: '450px' }"
@@ -110,7 +255,7 @@
         class="p-fluid custom-dialog"
       >
         <div class="p-field">
-          <label for="studentName">name student</label>
+          <label for="studentName">Nume student</label>
           <InputText id="studentName" v-model="newStudent.name" />
         </div>
         <div class="p-field">
@@ -157,7 +302,7 @@
       >
         <Column
           field="name"
-          header="name student"
+          header="Nume student"
           bodyClass="text-center"
           sortable
         ></Column>
@@ -180,13 +325,17 @@
           sortable
         ></Column>
       </DataTable>
+      <Card style="width: 100%" v-if="isResultVisibile">
+        <template #title> Rezultat </template>
+        <template #content>
+          <h3>
+            Rezultatul selecției studenților pentru programul Erasmus este:
+            <span v-for="student in erasmusStudents"> {{ student }}, </span>
+          </h3>
+        </template>
+      </Card>
     </TabPanel>
   </TabView>
-
-  <h2 v-if="erasmusStudents.length > 0">
-    Rezultatul selecției studenților pentru programul Erasmus este:
-    <span v-for="student in erasmusStudents"> {{ student }}, </span>
-  </h2>
 </template>
 
 <script setup>
@@ -285,6 +434,24 @@ const fuzzyStudents = ref([]); //Fuzzy Table Data
 const erasmusStudents = ref([]); //Array with the eligible erasmus students
 const nrErasmus = ref(2); //Number of erasmus students
 
+const isResultVisibile = ref(false);
+
+//BOUNDS FOR MEMBERSHIP FUNCTIONS
+
+const functionParams = ref({
+  stFunctionLow: 8,
+  stFunctionMedium: 9,
+  stFunctionHigh: 10,
+
+  secondFunctionLow: 7,
+  secondFunctionMedium: 9,
+  secondFunctionHigh: 10,
+
+  flFunctionLow: 8,
+  flFunctionMedium: 9.5,
+  flFunctionHigh: 10,
+});
+
 //FUZZY FUNCTIONS
 
 //FUZZY TRANSFORMATION LOGIC
@@ -299,37 +466,55 @@ const fuzzyTransform = () => {
 };
 
 const fuzzyFirst = (number) => {
-  if (number >= 0 && number < 8) {
+  if (number >= 0 && number < functionParams.value.stFunctionLow) {
     return 0;
   }
-  if (number >= 8 && number < 9) {
+  if (
+    number >= functionParams.value.stFunctionLow.value &&
+    number < functionParams.value.stFunctionMedium
+  ) {
     return Math.round((number - 8) * 10) / 10;
   }
-  if (number >= 9 && number <= 10) {
+  if (
+    number >= functionParams.value.stFunctionMedium &&
+    number <= functionParams.value.stFunctionHigh
+  ) {
     return 1;
   }
   return null;
 };
 const fuzzySecond = (number) => {
-  if (number >= 0 && number < 7) {
+  if (number >= 0 && number < functionParams.value.secondFunctionLow) {
     return 0;
   }
-  if (number >= 7 && number < 9) {
+  if (
+    number >= functionParams.value.secondFunctionLow &&
+    number < functionParams.value.secondFunctionMedium
+  ) {
     return Math.round(((number - 7) / 2) * 10) / 10;
   }
-  if (number >= 9 && number <= 10) {
+  if (
+    number >= functionParams.value.secondFunctionMedium &&
+    number <= functionParams.value.secondFunctionHigh
+  ) {
     return 1;
   }
   return null;
 };
 const fuzzyFL = (number) => {
-  if (number >= 0 && number < 8) {
+  if (number >= 0 && number < functionParams.value.flFunctionLow) {
     return 0;
   }
-  if (number >= 8 && number < 9.5) {
+  if (
+    number >= functionParams.value.flFunctionLow &&
+    number < functionParams.value.flFunctionMedium
+  ) {
     return Math.round(((number - 8) / 1.5) * 10) / 10;
   }
-  if (number >= 9.5 && number <= 10) {
+  if (
+    number >= functionParams.value.flFunctionMedium &&
+    number <= functionParams.value.flFunctionHigh
+  ) {
     return 1;
   }
   return null;
@@ -369,6 +554,7 @@ const returnAllResultArray = () => {
   //ARRAY OF ARRAYS
   return [rezultateBuneAn1, rezultateBuneAn2, rezultateBuneLS];
 };
+
 const getResult = () => {
   erasmusStudents.value = [];
   //Array with all the fuzzy sets
@@ -394,14 +580,23 @@ const getResult = () => {
   for (let i = 0; i < nrErasmus.value; i++) {
     erasmusStudents.value.push(membershipArray[i].name);
   }
-
-  console.log(
-    `fuzzyStudentsi caare pleaca in erasmus sunt ${erasmusStudents.value}`
-  );
 };
+
+//DOCUMENTATION (router or pdf)
+const getDocumentation = () => {
+  console.log("documentatie");
+};
+
+//watchers for each change
+watch(students, () => {
+  getResult();
+});
+watch(functionParams.value, () => {
+  getResult();
+});
 </script>
 
-<style>
+<style scoped>
 .p-column-header-content {
   justify-content: center;
 }
