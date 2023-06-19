@@ -28,11 +28,10 @@ import InputSwitch from "primevue/inputswitch";
 import Dropdown from "primevue/dropdown";
 import Checkbox from "primevue/checkbox";
 import ToastService from "primevue/toastservice";
-import TabView from 'primevue/tabview';
-import TabPanel from 'primevue/tabpanel';
-import Toolbar from 'primevue/toolbar';
-
-
+import TabView from "primevue/tabview";
+import TabPanel from "primevue/tabpanel";
+import Toolbar from "primevue/toolbar";
+import Card from "primevue/card";
 
 const app = createApp(App);
 app.use(router);
@@ -59,6 +58,7 @@ app.component("ToggleButton", ToggleButton);
 app.component("TabView", TabView);
 app.component("TabPanel", TabPanel);
 app.component("Toolbar", Toolbar);
+app.component("Card", Card);
 
 //directives
 app.directive("tooltip", Tooltip);

@@ -10,6 +10,13 @@
             class="mr-2"
             @click="openNew"
           />
+          <Button
+            label="Calculare fuzzy"
+            icon="pi pi-calculator"
+            severity="info"
+            class="mr-2"
+            @click="getResult"
+          />
         </template>
       </Toolbar>
       <DataTable
@@ -21,7 +28,7 @@
       >
         <Column
           field="name"
-          header="Nume student"
+          header="name student"
           bodyClass="text-center"
           sortable
         ></Column>
@@ -103,7 +110,7 @@
         class="p-fluid custom-dialog"
       >
         <div class="p-field">
-          <label for="studentName">Nume student</label>
+          <label for="studentName">name student</label>
           <InputText id="studentName" v-model="newStudent.name" />
         </div>
         <div class="p-field">
@@ -142,7 +149,7 @@
     </TabPanel>
     <TabPanel header="Tabel fuzzy">
       <DataTable
-        :value="students"
+        :value="fuzzyStudents"
         tableStyle="min-width: 50rem"
         paginator
         :rows="5"
@@ -150,7 +157,7 @@
       >
         <Column
           field="name"
-          header="Nume student"
+          header="name student"
           bodyClass="text-center"
           sortable
         ></Column>
@@ -175,10 +182,15 @@
       </DataTable>
     </TabPanel>
   </TabView>
+
+  <h2 v-if="erasmusStudents.length > 0">
+    Rezultatul selecției studenților pentru programul Erasmus este:
+    <span v-for="student in erasmusStudents"> {{ student }}, </span>
+  </h2>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, watch, onMounted } from "vue";
 
 const isDeleteStudentDialog = ref(false);
 const isAddStudent = ref(false);
@@ -189,23 +201,37 @@ const students = ref([
   {
     id: 1,
     name: "Student 1",
-    firstSemester: 8.9,
-    secondSemester: 9.4,
-    foreignLanguage: 8.7,
+    firstSemester: 8.6,
+    secondSemester: 9.1,
+    foreignLanguage: 9.2,
   },
   {
     id: 2,
     name: "Student 2",
-    firstSemester: 9.5,
-    secondSemester: 9.5,
-    foreignLanguage: 8,
+    firstSemester: 9.2,
+    secondSemester: 8.8,
+    foreignLanguage: 9.35,
   },
   {
     id: 3,
     name: "Student 3",
-    firstSemester: 10,
-    secondSemester: 7.5,
-    foreignLanguage: 9,
+    firstSemester: 9.7,
+    secondSemester: 9.2,
+    foreignLanguage: 9.5,
+  },
+  {
+    id: 4,
+    name: "Student 4",
+    firstSemester: 9.1,
+    secondSemester: 7.8,
+    foreignLanguage: 8.75,
+  },
+  {
+    id: 5,
+    name: "Student 5",
+    firstSemester: 8.8,
+    secondSemester: 9,
+    foreignLanguage: 8.3,
   },
 ]);
 
@@ -253,6 +279,126 @@ const findIndexById = (id) => {
     }
   }
 };
+
+////////////////////////FUZZY DATA/////////////
+const fuzzyStudents = ref([]); //Fuzzy Table Data
+const erasmusStudents = ref([]); //Array with the eligible erasmus students
+const nrErasmus = ref(2); //Number of erasmus students
+
+//FUZZY FUNCTIONS
+
+//FUZZY TRANSFORMATION LOGIC
+const fuzzyTransform = () => {
+  fuzzyStudents.value = students.value.map((student) => ({
+    id: student.id,
+    name: student.name,
+    firstSemester: fuzzyFirst(student.firstSemester),
+    secondSemester: fuzzySecond(student.secondSemester),
+    foreignLanguage: fuzzyFL(student.foreignLanguage),
+  }));
+};
+
+const fuzzyFirst = (number) => {
+  if (number >= 0 && number < 8) {
+    return 0;
+  }
+  if (number >= 8 && number < 9) {
+    return Math.round((number - 8) * 10) / 10;
+  }
+  if (number >= 9 && number <= 10) {
+    return 1;
+  }
+  return null;
+};
+const fuzzySecond = (number) => {
+  if (number >= 0 && number < 7) {
+    return 0;
+  }
+  if (number >= 7 && number < 9) {
+    return Math.round(((number - 7) / 2) * 10) / 10;
+  }
+  if (number >= 9 && number <= 10) {
+    return 1;
+  }
+  return null;
+};
+const fuzzyFL = (number) => {
+  if (number >= 0 && number < 8) {
+    return 0;
+  }
+  if (number >= 8 && number < 9.5) {
+    return Math.round(((number - 8) / 1.5) * 10) / 10;
+  }
+  if (number >= 9.5 && number <= 10) {
+    return 1;
+  }
+  return null;
+};
+
+//Transform the data for the fuzzy table
+watch(students, () => {
+  fuzzyTransform();
+});
+onMounted(() => {
+  fuzzyTransform();
+});
+
+//Function that return an array with all the fuzzy sets
+const returnAllResultArray = () => {
+  //FIRST YEAR RESULTS ARRAY FOR EACH STUDENTS
+  const rezultateBuneAn1 = fuzzyStudents.value.map(
+    ({ name, firstSemester }) => ({
+      name,
+      firstSemester,
+    })
+  );
+  //SECOND YEAR RESSULTS ARRAY FOR EACH STUDENTS
+  const rezultateBuneAn2 = fuzzyStudents.value.map(
+    ({ name, secondSemester }) => ({
+      name,
+      secondSemester,
+    })
+  );
+  // LS RESULT ARRAY FOR EACH STUDENTS
+  const rezultateBuneLS = fuzzyStudents.value.map(
+    ({ name, foreignLanguage }) => ({
+      name,
+      foreignLanguage,
+    })
+  );
+  //ARRAY OF ARRAYS
+  return [rezultateBuneAn1, rezultateBuneAn2, rezultateBuneLS];
+};
+const getResult = () => {
+  erasmusStudents.value = [];
+  //Array with all the fuzzy sets
+  const allArray = returnAllResultArray();
+
+  //Membership function array
+  const membershipArray = fuzzyStudents.value.map((student) => {
+    const { name } = student;
+    const lowestResult = Math.min(
+      ...allArray.map((currentArray) => {
+        return currentArray.find((x) => x.name === name)[
+          Object.keys(currentArray[0])[1]
+        ];
+      })
+    );
+    return { name, lowestResult };
+  });
+
+  //sort membership array highest to lowest
+  membershipArray.sort((a, b) => b.lowestResult - a.lowestResult);
+
+  //populate erasmusStudents array with the number of erasmus students
+  for (let i = 0; i < nrErasmus.value; i++) {
+    erasmusStudents.value.push(membershipArray[i].name);
+  }
+
+  console.log(
+    `fuzzyStudentsi caare pleaca in erasmus sunt ${erasmusStudents.value}`
+  );
+};
 </script>
 
 <style>
@@ -261,6 +407,6 @@ const findIndexById = (id) => {
 }
 
 .danger-icon {
-  color: #EA5455;
+  color: #ea5455;
 }
 </style>
