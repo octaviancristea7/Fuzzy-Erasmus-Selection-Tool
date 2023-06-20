@@ -32,6 +32,7 @@ import TabView from "primevue/tabview";
 import TabPanel from "primevue/tabpanel";
 import Toolbar from "primevue/toolbar";
 import Card from "primevue/card";
+import FocusTrap from "primevue/focustrap";
 
 const app = createApp(App);
 app.use(router);
@@ -62,3 +63,4 @@ app.component("Card", Card);
 
 //directives
 app.directive("tooltip", Tooltip);
+app.directive("focustrap", FocusTrap);

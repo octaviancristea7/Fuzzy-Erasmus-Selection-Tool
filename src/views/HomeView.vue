@@ -28,7 +28,15 @@
             severity="help"
             class="mr-2"
             @click="getDocumentation"
-        /></template>
+          />
+          <Button
+            label="SETĂRI"
+            icon="pi pi-cog"
+            severity="help"
+            class="mr-2"
+            @click="openSettings"
+          />
+        </template>
       </Toolbar>
       <div
         id="tableAndCardWrapper"
@@ -291,6 +299,28 @@
           </div>
         </template>
       </Dialog>
+      <Dialog
+        v-model:visible="isSettings"
+        modal
+        header="Setări"
+        :style="{ width: '50vw' }"
+      >
+        <p>Setează numărul de studenți eligibili pentru selecție:</p>
+        <div class="flex card m-2 p-2">
+          <span class="p-float-label">
+            <InputNumber id="eligibleStudents" v-model="eligibleStudents" />
+            <label for="eligibleStudents">Număr studenți</label>
+          </span>
+        </div>
+        <div class="flex justify-content-center">
+          <Button
+            label="OK"
+            icon="pi pi-check"
+            class="p-button-success"
+            @click="closeSettings"
+          />
+        </div>
+      </Dialog>
     </TabPanel>
     <TabPanel header="Tabel fuzzy">
       <DataTable
@@ -344,44 +374,53 @@ import { ref, watch, onMounted } from "vue";
 const isDeleteStudentDialog = ref(false);
 const isAddStudent = ref(false);
 const student = ref({});
+const isSettings = ref(false);
+
+const openSettings = () => {
+  isSettings.value = true;
+};
+
+const closeSettings = () => {
+  isSettings.value = false;
+};
 
 //Hardcoded data - to be removed
 const students = ref([
-  {
-    id: 1,
-    name: "Student 1",
-    firstSemester: 8.6,
-    secondSemester: 9.1,
-    foreignLanguage: 9.2,
-  },
-  {
-    id: 2,
-    name: "Student 2",
-    firstSemester: 9.2,
-    secondSemester: 8.8,
-    foreignLanguage: 9.35,
-  },
-  {
-    id: 3,
-    name: "Student 3",
-    firstSemester: 9.7,
-    secondSemester: 9.2,
-    foreignLanguage: 9.5,
-  },
-  {
-    id: 4,
-    name: "Student 4",
-    firstSemester: 9.1,
-    secondSemester: 7.8,
-    foreignLanguage: 8.75,
-  },
-  {
-    id: 5,
-    name: "Student 5",
-    firstSemester: 8.8,
-    secondSemester: 9,
-    foreignLanguage: 8.3,
-  },
+  // {
+  //   id: 1,
+  //   name: "Student 1",
+  //   firstSemester: 8.6,
+  //   secondSemester: 9.1,
+  //   foreignLanguage: 9.2,
+  // },
+  // {
+  //   id: 2,
+  //   name: "Student 2",
+  //   firstSemester: 9.2,
+  //   secondSemester: 8.8,
+  //   foreignLanguage: 9.35,
+  // },
+  // {
+  //   id: 3,
+  //   name: "Student 3",
+  //   firstSemester: 9.7,
+  //   secondSemester: 9.2,
+  //   foreignLanguage: 9.5,
+  // },
+  // {
+  //   id: 4,
+  //   name: "Student 4",
+  //   firstSemester: 9.1,
+  //   secondSemester: 7.8,
+  //   foreignLanguage: 8.75,
+  // },
+  // {
+  //   id: 5,
+  //   name: "Student 5",
+  //   firstSemester: 8.8,
+  //   secondSemester: 9,
+  //   foreignLanguage: 8.3,
+  // },
 ]);
 
 const newStudent = ref({
@@ -391,6 +430,35 @@ const newStudent = ref({
   secondSemester: null,
   foreignLanguage: null,
 });
+
+//Add new student function
+const addStudent = () => {
+  isAddStudent.value = false;
+  const studentId = students.value.length + 1;
+  const newStudentData = {
+    id: studentId,
+    name: newStudent.value.name,
+    firstSemester: newStudent.value.firstSemester,
+    secondSemester: newStudent.value.secondSemester,
+    foreignLanguage: newStudent.value.foreignLanguage,
+  };
+  students.value.push(newStudentData);
+  resetNewStudent();
+  console.log(students.value);
+};
+
+const resetNewStudent = () => {
+  newStudent.value.id = null;
+  newStudent.value.name = null;
+  newStudent.value.firstSemester = null;
+  newStudent.value.secondSemester = null;
+  newStudent.value.foreignLanguage = null;
+};
+
+//To be continued
+const editStudent = () => {
+  console.log("Edit");
+};
 
 //Student delete dialog opening
 const confirmDeleteStudent = (stud) => {
@@ -402,6 +470,11 @@ const confirmDeleteStudent = (stud) => {
 const deleteStudent = () => {
   students.value = students.value.filter((val) => val.id !== student.value.id);
   isDeleteStudentDialog.value = false;
+  fuzzyTransform();
+
+  if (fuzzyStudents.value.length >= eligibleStudents.value) {
+    getResult();
+  }
 };
 
 //Add new student dialog opening
@@ -409,30 +482,21 @@ const openNew = () => {
   isAddStudent.value = true;
 };
 
-//Add new student function - to be continued
-const addStudent = () => {
-  isAddStudent.value = false;
-};
-
-const editStudent = () => {
-  console.log("Edit student TBE");
-};
-
 //To be continued
-const findIndexById = (id) => {
-  let index = -1;
-  for (let i = 0; i < students.value.length; i++) {
-    if (students.value[i].id === id) {
-      index = i;
-      break;
-    }
-  }
-};
+// const findIndexById = (id) => {
+//   let index = -1;
+//   for (let i = 0; i < students.value.length; i++) {
+//     if (students.value[i].id === id) {
+//       index = i;
+//       break;
+//     }
+//   }
+// };
 
 ////////////////////////FUZZY DATA/////////////
 const fuzzyStudents = ref([]); //Fuzzy Table Data
 const erasmusStudents = ref([]); //Array with the eligible erasmus students
-const nrErasmus = ref(2); //Number of erasmus students
+const eligibleStudents = ref(null); //Number of erasmus students
 
 const isResultVisibile = ref(false);
 
@@ -456,21 +520,26 @@ const functionParams = ref({
 
 //FUZZY TRANSFORMATION LOGIC
 const fuzzyTransform = () => {
-  fuzzyStudents.value = students.value.map((student) => ({
-    id: student.id,
-    name: student.name,
-    firstSemester: fuzzyFirst(student.firstSemester),
-    secondSemester: fuzzySecond(student.secondSemester),
-    foreignLanguage: fuzzyFL(student.foreignLanguage),
-  }));
+  fuzzyStudents.value = [];
+  if (students.value.length > 0) {
+    fuzzyStudents.value = students.value.map((student) => ({
+      id: student.id,
+      name: student.name,
+      firstSemester: fuzzyFirst(student.firstSemester),
+      secondSemester: fuzzySecond(student.secondSemester),
+      foreignLanguage: fuzzyFL(student.foreignLanguage),
+    }));
+  }
 };
 
 const fuzzyFirst = (number) => {
+  console.log(number);
+
   if (number >= 0 && number < functionParams.value.stFunctionLow) {
     return 0;
   }
   if (
-    number >= functionParams.value.stFunctionLow.value &&
+    number >= functionParams.value.stFunctionLow &&
     number < functionParams.value.stFunctionMedium
   ) {
     return Math.round((number - 8) * 10) / 10;
@@ -521,8 +590,10 @@ const fuzzyFL = (number) => {
 };
 
 //Transform the data for the fuzzy table
-watch(students, () => {
-  fuzzyTransform();
+watch(students.value, () => {
+  if (students.value.length > 0) {
+    fuzzyTransform();
+  }
 });
 onMounted(() => {
   fuzzyTransform();
@@ -577,7 +648,7 @@ const getResult = () => {
   membershipArray.sort((a, b) => b.lowestResult - a.lowestResult);
 
   //populate erasmusStudents array with the number of erasmus students
-  for (let i = 0; i < nrErasmus.value; i++) {
+  for (let i = 0; i < eligibleStudents.value; i++) {
     erasmusStudents.value.push(membershipArray[i].name);
   }
 };
@@ -588,11 +659,21 @@ const getDocumentation = () => {
 };
 
 //watchers for each change
-watch(students, () => {
-  getResult();
+watch(students.value, () => {
+  if (
+    fuzzyStudents.value.length > 0 &&
+    fuzzyStudents.value.length >= eligibleStudents.value
+  ) {
+    getResult();
+  }
 });
 watch(functionParams.value, () => {
-  getResult();
+  if (
+    fuzzyStudents.value.length > 0 &&
+    fuzzyStudents.value.length >= eligibleStudents.value
+  ) {
+    getResult();
+  }
 });
 </script>
 
