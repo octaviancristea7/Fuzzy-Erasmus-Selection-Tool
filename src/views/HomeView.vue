@@ -15,10 +15,7 @@
             icon="pi pi-calculator"
             severity="info"
             class="mr-2"
-            @click="
-              getResult();
-              isResultVisibile = true;
-            "
+            @click="executeFuzzyFunction()"
           />
         </template>
         <template #end>
@@ -366,15 +363,29 @@
       </Card>
     </TabPanel>
   </TabView>
+  <Toast />
 </template>
 
 <script setup>
 import { ref, watch, onMounted } from "vue";
+import { useToast } from "primevue/usetoast";
 
 const isDeleteStudentDialog = ref(false);
 const isAddStudent = ref(false);
 const student = ref({});
 const isSettings = ref(false);
+
+//toaster
+const toast = useToast();
+
+const displayToast = (msg) => {
+  toast.add({
+    severity: "info",
+    summary: "Info",
+    detail: msg,
+    life: 3000,
+  });
+};
 
 const openSettings = () => {
   isSettings.value = true;
@@ -471,6 +482,7 @@ const deleteStudent = () => {
   students.value = students.value.filter((val) => val.id !== student.value.id);
   isDeleteStudentDialog.value = false;
   fuzzyTransform();
+  erasmusStudents.value = [];
 
   if (fuzzyStudents.value.length >= eligibleStudents.value) {
     getResult();
@@ -496,7 +508,7 @@ const openNew = () => {
 ////////////////////////FUZZY DATA/////////////
 const fuzzyStudents = ref([]); //Fuzzy Table Data
 const erasmusStudents = ref([]); //Array with the eligible erasmus students
-const eligibleStudents = ref(null); //Number of erasmus students
+const eligibleStudents = ref(0); //Number of erasmus students
 
 const isResultVisibile = ref(false);
 
@@ -626,8 +638,26 @@ const returnAllResultArray = () => {
   return [rezultateBuneAn1, rezultateBuneAn2, rezultateBuneLS];
 };
 
+const executeFuzzyFunction = () => {
+  if (students.value.length === 0) {
+    displayToast("Nu sunt studenți introduși");
+    return;
+  }
+
+  if (eligibleStudents.value === 0 || eligibleStudents.value === null) {
+    displayToast("Nu a fost selectat numărul de studenți Erasmus");
+    return;
+  }
+
+  if (fuzzyStudents.value.length < eligibleStudents.value) {
+    displayToast("Prea puțini studenți introduși");
+    return;
+  }
+
+  getResult();
+  isResultVisibile.value = true;
+};
 const getResult = () => {
-  erasmusStudents.value = [];
   //Array with all the fuzzy sets
   const allArray = returnAllResultArray();
 
@@ -646,7 +676,7 @@ const getResult = () => {
 
   //sort membership array highest to lowest
   membershipArray.sort((a, b) => b.lowestResult - a.lowestResult);
-
+  erasmusStudents.value = [];
   //populate erasmusStudents array with the number of erasmus students
   for (let i = 0; i < eligibleStudents.value; i++) {
     erasmusStudents.value.push(membershipArray[i].name);
@@ -660,6 +690,7 @@ const getDocumentation = () => {
 
 //watchers for each change
 watch(students.value, () => {
+  erasmusStudents.value = [];
   if (
     fuzzyStudents.value.length > 0 &&
     fuzzyStudents.value.length >= eligibleStudents.value
@@ -668,6 +699,7 @@ watch(students.value, () => {
   }
 });
 watch(functionParams.value, () => {
+  erasmusStudents.value = [];
   if (
     fuzzyStudents.value.length > 0 &&
     fuzzyStudents.value.length >= eligibleStudents.value
