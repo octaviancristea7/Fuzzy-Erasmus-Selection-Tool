@@ -34,6 +34,10 @@ import Toolbar from "primevue/toolbar";
 import Card from "primevue/card";
 import FocusTrap from "primevue/focustrap";
 import Toast from "primevue/toast";
+import Image from 'primevue/image';
+import Divider from 'primevue/divider';
+
+
 
 const app = createApp(App);
 app.use(router);
@@ -62,6 +66,8 @@ app.component("TabPanel", TabPanel);
 app.component("Toolbar", Toolbar);
 app.component("Card", Card);
 app.component("Toast", Toast);
+app.component("Image", Image);
+app.component("Divider", Divider);
 
 //directives
 app.directive("tooltip", Tooltip);

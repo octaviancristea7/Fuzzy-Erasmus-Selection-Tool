@@ -1,4 +1,10 @@
 <template>
+  <div class="flex align-items-center justify-content logo">
+    <Image src="/public/Logo-UT-NEGRU-RO.png" alt="Image" width="250" height="115" class="unitbv" />
+    <Divider layout="vertical" />
+    <Image src="/public/logoerasmus.png" alt="Image" width="250" height="120" class="erasmus" />
+  </div>
+
   <TabView>
     <TabPanel header="Tabel note">
       <Toolbar class="mb-4">
@@ -8,7 +14,7 @@
             icon="pi pi-plus"
             severity="success"
             class="mr-2"
-            @click="openNew"
+            @click="isAddStudent = true"
           />
           <Button
             label="CALCULARE FUZZY"
@@ -27,11 +33,10 @@
             @click="getDocumentation"
           />
           <Button
-            label="SETĂRI"
             icon="pi pi-cog"
             severity="help"
             class="mr-2"
-            @click="openSettings"
+            @click="isSettings = true"
           />
         </template>
       </Toolbar>
@@ -88,7 +93,7 @@
                   outlined
                   rounded
                   class="mr-2"
-                  @click="editStudent"
+                  @click="openEditDialog(slotProps.data)"
                 />
                 <Button
                   icon="pi pi-trash"
@@ -103,10 +108,14 @@
           <Card style="width: 100%" v-if="isResultVisibile">
             <template #title> Rezultat </template>
             <template #content>
-              <h3>
+              <h3 v-if="erasmusStudents.length > 0">
                 Rezultatul selecției studenților pentru programul Erasmus este:
-                <span v-for="student in erasmusStudents"> {{ student }}, </span>
+                <span v-for="(student, index) in erasmusStudents" :key="index">
+                  {{ student }}
+                  {{ index < erasmusStudents.length - 1 ? ",&nbsp;" : "." }}
+                </span>
               </h3>
+              <h3 v-else>Prea puțini studenți în tabel.</h3>
             </template>
           </Card>
         </div>
@@ -314,9 +323,59 @@
             label="OK"
             icon="pi pi-check"
             class="p-button-success"
-            @click="closeSettings"
+            @click="isSettings = false"
           />
         </div>
+      </Dialog>
+      <Dialog
+        v-model:visible="isEdit"
+        :style="{ width: '450px' }"
+        header="Confirmare"
+        :modal="true"
+        class="p-fluid custom-dialog"
+      >
+        <div class="p-field">
+          <label for="studentName">Nume student</label>
+          <InputText id="studentName" v-model="editStudentData.name" />
+        </div>
+        <div class="p-field">
+          <label for="firstSemester">Medie semestrul 1</label>
+          <InputText
+            id="firstSemester"
+            v-model="editStudentData.firstSemester"
+          />
+        </div>
+        <div class="p-field">
+          <label for="secondSemester">Medie semestrul 2</label>
+          <InputText
+            id="secondSemester"
+            v-model="editStudentData.secondSemester"
+          />
+        </div>
+        <div class="p-field">
+          <label for="foreignLanguage">Notă limbă străină</label>
+          <InputText
+            id="foreignLanguage"
+            v-model="editStudentData.foreignLanguage"
+          />
+        </div>
+
+        <template #footer>
+          <div class="p-dialog-footer">
+            <Button
+              label="ANULEAZĂ"
+              icon="pi pi-times"
+              @click="isEdit = false"
+              class="p-button-secondary"
+            />
+            <Button
+              label="EDITEAZĂ"
+              icon="pi pi-check"
+              class="p-button-success"
+              @click="saveEditedStudent()"
+            />
+          </div>
+        </template>
       </Dialog>
     </TabPanel>
     <TabPanel header="Tabel fuzzy">
@@ -355,10 +414,14 @@
       <Card style="width: 100%" v-if="isResultVisibile">
         <template #title> Rezultat </template>
         <template #content>
-          <h3>
+          <h3 v-if="erasmusStudents.length > 0">
             Rezultatul selecției studenților pentru programul Erasmus este:
-            <span v-for="student in erasmusStudents"> {{ student }}, </span>
+            <span v-for="(student, index) in erasmusStudents" :key="index">
+              {{ student }}
+              {{ index < erasmusStudents.length - 1 ? ",&nbsp;" : "." }}
+            </span>
           </h3>
+          <h3 v-else>Prea puțini studenți în tabel.</h3>
         </template>
       </Card>
     </TabPanel>
@@ -374,6 +437,8 @@ const isDeleteStudentDialog = ref(false);
 const isAddStudent = ref(false);
 const student = ref({});
 const isSettings = ref(false);
+const isEdit = ref(false);
+const editStudentData = ref({});
 
 //toaster
 const toast = useToast();
@@ -387,30 +452,22 @@ const displayToast = (msg) => {
   });
 };
 
-const openSettings = () => {
-  isSettings.value = true;
-};
-
-const closeSettings = () => {
-  isSettings.value = false;
-};
-
 //Hardcoded data - to be removed
 const students = ref([
-  // {
-  //   id: 1,
-  //   name: "Student 1",
-  //   firstSemester: 8.6,
-  //   secondSemester: 9.1,
-  //   foreignLanguage: 9.2,
-  // },
-  // {
-  //   id: 2,
-  //   name: "Student 2",
-  //   firstSemester: 9.2,
-  //   secondSemester: 8.8,
-  //   foreignLanguage: 9.35,
-  // },
+  {
+    id: 1,
+    name: "Student 1",
+    firstSemester: 8.6,
+    secondSemester: 9.1,
+    foreignLanguage: 9.2,
+  },
+  {
+    id: 2,
+    name: "Student 2",
+    firstSemester: 9.2,
+    secondSemester: 8.8,
+    foreignLanguage: 9.35,
+  },
   // {
   //   id: 3,
   //   name: "Student 3",
@@ -455,7 +512,6 @@ const addStudent = () => {
   };
   students.value.push(newStudentData);
   resetNewStudent();
-  console.log(students.value);
 };
 
 const resetNewStudent = () => {
@@ -466,9 +522,27 @@ const resetNewStudent = () => {
   newStudent.value.foreignLanguage = null;
 };
 
-//To be continued
-const editStudent = () => {
-  console.log("Edit");
+const openEditDialog = (student) => {
+  editStudentData.value = { ...student };
+  console.log(student);
+  isEdit.value = true;
+};
+
+// Function to save the edited student data
+const saveEditedStudent = () => {
+  // Find the index of the edited student in the students array
+  const index = students.value.findIndex(
+    (student) => student.id === editStudentData.value.id
+  );
+
+  if (index !== -1) {
+    // Update the student data at the found index
+    students.value[index] = { ...editStudentData.value };
+    // Close the edit dialog
+    isEdit.value = false;
+    // Reset the editStudentData object
+    editStudentData.value = {};
+  }
 };
 
 //Student delete dialog opening
@@ -488,22 +562,6 @@ const deleteStudent = () => {
     getResult();
   }
 };
-
-//Add new student dialog opening
-const openNew = () => {
-  isAddStudent.value = true;
-};
-
-//To be continued
-// const findIndexById = (id) => {
-//   let index = -1;
-//   for (let i = 0; i < students.value.length; i++) {
-//     if (students.value[i].id === id) {
-//       index = i;
-//       break;
-//     }
-//   }
-// };
 
 ////////////////////////FUZZY DATA/////////////
 const fuzzyStudents = ref([]); //Fuzzy Table Data
@@ -710,11 +768,18 @@ watch(functionParams.value, () => {
 </script>
 
 <style scoped>
-.p-column-header-content {
+:deep(.p-column-header-content){
   justify-content: center;
 }
 
 .danger-icon {
   color: #ea5455;
 }
+.logo {
+  justify-content: center;
+}
+
+/* .erasmus, .unitbv {
+  height: 115px;
+} */
 </style>
