@@ -65,13 +65,13 @@
             ></Column>
             <Column
               field="firstSemester"
-              header="Medie semestrul I"
+              header="Medie anul I"
               bodyClass="text-center"
               sortable
             ></Column>
             <Column
               field="secondSemester"
-              header="Medie semestrul II"
+              header="Medie anul II, semestrul I"
               bodyClass="text-center"
               sortable
             ></Column>
@@ -121,7 +121,7 @@
         </div>
         <div id="cardWrappers" class="flex flex-column">
           <Card class="m-1 p-0" style="width: 25em; height: 25%">
-            <template #title> Semestrul I </template>
+            <template #title> Anul I </template>
             <template #subtitle> Funcție apartenență </template>
             <template #content>
               <p>
@@ -158,7 +158,7 @@
             </template>
           </Card>
           <Card class="m-1 p-0" style="width: 25em">
-            <template #title> Semestrul II </template>
+            <template #title> Anul II, semestrul I </template>
             <template #subtitle> Funcție apartenență </template>
             <template #content>
               <p>
@@ -394,13 +394,13 @@
         ></Column>
         <Column
           field="firstSemester"
-          header="Medie semestrul I"
+          header="Medie anul I"
           bodyClass="text-center"
           sortable
         ></Column>
         <Column
           field="secondSemester"
-          header="Medie semestrul II"
+          header="Medie anul II, semestrul I"
           bodyClass="text-center"
           sortable
         ></Column>
@@ -468,27 +468,27 @@ const students = ref([
     secondSemester: 8.8,
     foreignLanguage: 9.35,
   },
-  // {
-  //   id: 3,
-  //   name: "Student 3",
-  //   firstSemester: 9.7,
-  //   secondSemester: 9.2,
-  //   foreignLanguage: 9.5,
-  // },
-  // {
-  //   id: 4,
-  //   name: "Student 4",
-  //   firstSemester: 9.1,
-  //   secondSemester: 7.8,
-  //   foreignLanguage: 8.75,
-  // },
-  // {
-  //   id: 5,
-  //   name: "Student 5",
-  //   firstSemester: 8.8,
-  //   secondSemester: 9,
-  //   foreignLanguage: 8.3,
-  // },
+  {
+    id: 3,
+    name: "Student 3",
+    firstSemester: 9.7,
+    secondSemester: 9.2,
+    foreignLanguage: 9.5,
+  },
+  {
+    id: 4,
+    name: "Student 4",
+    firstSemester: 9.1,
+    secondSemester: 7.8,
+    foreignLanguage: 8.75,
+  },
+  {
+    id: 5,
+    name: "Student 5",
+    firstSemester: 8.8,
+    secondSemester: 9,
+    foreignLanguage: 8.3,
+  },
 ]);
 
 const newStudent = ref({
