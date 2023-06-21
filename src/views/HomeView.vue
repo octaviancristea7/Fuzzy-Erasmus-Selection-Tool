@@ -1,8 +1,20 @@
 <template>
   <div class="flex align-items-center justify-content logo">
-    <Image src="/public/Logo-UT-NEGRU-RO.png" alt="Image" width="250" height="115" class="unitbv" />
+    <Image
+      src="/public/Logo-UT-NEGRU-RO.png"
+      alt="Image"
+      width="250"
+      height="115"
+      class="unitbv"
+    />
     <Divider layout="vertical" />
-    <Image src="/public/logoerasmus.png" alt="Image" width="250" height="120" class="erasmus" />
+    <Image
+      src="/public/logoerasmus.png"
+      alt="Image"
+      width="250"
+      height="120"
+      class="erasmus"
+    />
   </div>
 
   <TabView>
@@ -30,7 +42,7 @@
             icon="pi pi-book"
             severity="help"
             class="mr-2"
-            @click="getDocumentation"
+            @click="openDocumentation"
           />
           <Button
             icon="pi pi-cog"
@@ -742,8 +754,9 @@ const getResult = () => {
 };
 
 //DOCUMENTATION (router or pdf)
-const getDocumentation = () => {
-  console.log("documentatie");
+const openDocumentation = () => {
+  const pdfPath = "/public/Documentatie_subiectul_4.pdf";
+  window.open(pdfPath, "_blank");
 };
 
 //watchers for each change
@@ -768,7 +781,7 @@ watch(functionParams.value, () => {
 </script>
 
 <style scoped>
-:deep(.p-column-header-content){
+:deep(.p-column-header-content) {
   justify-content: center;
 }
 
